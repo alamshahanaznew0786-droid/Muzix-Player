@@ -1,0 +1,39 @@
+name: Build Muzic APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Gradle
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.9-bin.zip
+          sudo unzip -q gradle-8.9-bin.zip -d /opt
+          echo "/opt/gradle-8.9/bin" >> "$GITHUB_PATH"
+
+      - name: Extract Muzic project
+        run: unzip -q Muzic-Android-Starter.zip -d project
+
+      - name: Build APK
+        run: gradle -p project/Muzic assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Muzic-APK
+          path: project/Muzic/app/build/outputs/apk/debug/app-debug.apk
+          
